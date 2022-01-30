@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <fstream>
 #include <stdlib.h>
+#include <limits.h>
 
 using namespace std;
 
@@ -25,12 +26,12 @@ Tensor maxpooling(Tensor op, int k = 3, int p = 1, int s = 2)
 
 
     // get the size of op
-    int d4 = op.size();
-    int d3 = op[0].size();
-    int edge = op[0][0].size();
+    const int d4 = op.size();
+    const int d3 = op[0].size();
+    const int edge = op[0][0].size();
 
     //calculate the size of output
-    int w = floor((edge - k + 2 * p) / s) + 1;
+    const int w = floor((edge - k + 2 * p) / s) + 1;
 
     Tensor result(d4, vector<vector<vector<int>>>(d3, vector<vector<int>>(w, vector<int>(w, 0))));
 
@@ -42,7 +43,7 @@ Tensor maxpooling(Tensor op, int k = 3, int p = 1, int s = 2)
         {
             int id = omp_get_thread_num();
             int nthrds = omp_get_num_threads();
-            for (int y = id; y < result[0].size(); y = y+nthrds)
+            for (int y = id; y < result[0].size(); y += nthrds)
             {
             
                 // padding 
@@ -80,23 +81,22 @@ Tensor maxpooling(Tensor op, int k = 3, int p = 1, int s = 2)
                         int col_end = j * s + k;
 
 
-                        vector<int> tmp;
+                        int max_num = patch[i][j];
                         for (int r = i; r < row_end; r++)
                         {
                             for (int c = j; c < col_end; c++)
                             {
-                                tmp.push_back(patch[r][c]);
+                                if (patch[r][c] >= max_num)
+                                {
+                                    max_num = patch[r][c];
+                                }
 
                             }
 
                         }
 
-                        // find the max value in the current patch
-                        sort(tmp.begin(), tmp.end());
-
-
                         // assign value
-                        result[x][y][i][j] = tmp[tmp.size() - 1];
+                        result[x][y][i][j] = max_num;
 
                     }
 
@@ -129,9 +129,9 @@ Tensor elemwiseadd(Tensor op1, Tensor op2)
     const int op2_w = op2[0][0].size();
 
     // set the size of the results
-    int d4 = max(op1_d4, op2_d4);
-    int d3 = max(op1_d3, op2_d3);
-    int w = max(op1_w, op2_w);
+    const int d4 = max(op1_d4, op2_d4);
+    const int d3 = max(op1_d3, op2_d3);
+    const int w = max(op1_w, op2_w);
 
 
     // new a result space
@@ -139,6 +139,7 @@ Tensor elemwiseadd(Tensor op1, Tensor op2)
     Tensor res(d4, vector<vector<vector<int>>>(d3, vector<vector<int>>(w, vector<int>(w, 0))));
 
     // element wise add
+    #pragma omp parallel for
     for (int x = 0; x < res.size(); x++)
     {
         for (int y = 0; y < res[0].size(); y++)

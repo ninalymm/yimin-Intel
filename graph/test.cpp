@@ -12,12 +12,12 @@ typedef vector<vector<vector<vector<int>>>> Tensor;
 using namespace std;
 
 // main test
-void main()
+int main()
 {
 
     //initialisation
     Tensor s1(32, vector<vector<vector<int>>>(64, vector<vector<int>>(112, vector<int>(112, 0))));
-    Tensor s2(32, vector<vector<vector<int>>>(1, vector<vector<int>>(56, vector<int>(56, 1))));
+    Tensor s2(32, vector<vector<vector<int>>>(1, vector<vector<int>>(56, vector<int>(56, 2))));
 
 
     /*
@@ -48,14 +48,7 @@ void main()
         that is: output = maxpooling(tensor1) + tensor2
     */
 
-    //time_t seconds1,seconds2,seconds3;
-
-    //seconds1 = time(NULL);
-    //src1 = maxpooling(s1);
-    //seconds2 = time(NULL);
-
     output = elemwiseadd(maxpooling(s1), s2);
-    //seconds3 = time(NULL);
 
     /*
      // testoutput
@@ -84,6 +77,8 @@ void main()
         cout << "output  " << "third round" << "";
         cout << '\n';
     }*/
+
+    return 0;
 
 
 }
