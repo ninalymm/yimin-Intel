@@ -13,7 +13,7 @@
 using namespace std;
 
 typedef vector<vector<vector<vector<int>>>> Tensor;
-
+#define NUM_THREADS 8
 
 Tensor maxpooling(Tensor op, int k = 3, int p = 1, int s = 2)
 {
@@ -25,24 +25,28 @@ Tensor maxpooling(Tensor op, int k = 3, int p = 1, int s = 2)
 
 
     // get the size of op
-    const int d4 = op.size();
-    const int d3 = op[0].size();
-    const int edge = op[0][0].size();
+    int d4 = op.size();
+    int d3 = op[0].size();
+    int edge = op[0][0].size();
 
     //calculate the size of output
-    const int w = floor((edge - k + 2 * p) / s) + 1;
+    int w = floor((edge - k + 2 * p) / s) + 1;
 
     Tensor result(d4, vector<vector<vector<int>>>(d3, vector<vector<int>>(w, vector<int>(w, 0))));
 
+    omp_set_num_threads(NUM_THREADS);
     // padding and maxpooling
     for (int x = 0; x < result.size(); x++)
     {
-        for (int y = 0; y < result[0].size(); y++)
+        #pragma omp parallel
         {
-            #pragma omp parallel
+            int id = omp_get_thread_num();
+            int nthrds = omp_get_num_threads();
+            for (int y = id; y < result[0].size(); y = y+nthrds)
             {
+            
                 // padding 
-
+               
                 vector<vector<int>> patch = op[x][y];
 
                 // pad row

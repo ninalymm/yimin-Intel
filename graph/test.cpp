@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <ctime>
 #include "graph.h" 
+#include "omp.h"
 
 typedef vector<vector<vector<vector<int>>>> Tensor;
 using namespace std;
@@ -15,8 +16,8 @@ void main()
 {
 
     //initialisation
-    Tensor s1(32, vector<vector<vector<int>>>(32, vector<vector<int>>(32, vector<int>(32, 0))));
-    Tensor s2(32, vector<vector<vector<int>>>(1, vector<vector<int>>(16, vector<int>(16, 4))));
+    Tensor s1(32, vector<vector<vector<int>>>(64, vector<vector<int>>(112, vector<int>(112, 0))));
+    Tensor s2(32, vector<vector<vector<int>>>(1, vector<vector<int>>(56, vector<int>(56, 1))));
 
 
     /*
@@ -56,7 +57,6 @@ void main()
     output = elemwiseadd(maxpooling(s1), s2);
     //seconds3 = time(NULL);
 
-    
     /*
      // testoutput
     for (int i = 0; i < output.size(); i++)
@@ -82,6 +82,8 @@ void main()
         }
         cout << '\n';
         cout << "output  " << "third round" << "";
-    }   cout << '\n';
-    */
+        cout << '\n';
+    }*/
+
+
 }
