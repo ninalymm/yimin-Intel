@@ -1,12 +1,12 @@
 ﻿#include <iostream>
 #include "omp.h"
-#include <iostream>
 #include <math.h>
 #include <vector>
 #include <algorithm>
 #include <fstream>
 #include <stdlib.h>
 #include <limits.h>
+#include <nmmintrin.h>
 
 using namespace std;
 
@@ -29,13 +29,13 @@ Tensor maxpooling(Tensor op, int k = 3, int p = 1, int s = 2)
     omp_set_num_threads(NUM_THREADS);
     
     // padding and maxpooling
-    for (int x = 0; x < result.size(); x++)
+    for (int y = 0; y < result[0].size(); y++)
     {
         #pragma omp parallel
         {
             int id = omp_get_thread_num();
             int nthrds = omp_get_num_threads();
-            for (int y = id; y < result[0].size(); y += nthrds)
+            for (int x = id; x < result.size(); x += nthrds)
             {
             
                 // padding 
@@ -74,16 +74,17 @@ Tensor maxpooling(Tensor op, int k = 3, int p = 1, int s = 2)
 
 
                         int max_num = patch[i][j];
-                        for (int r = i; r < row_end; r++)
+                        
+                        for (int c = j; c < col_end; c++)
                         {
-                            for (int c = j; c < col_end; c++)
-                            {
+                           for (int r = i; r < row_end; r++)
+                           {
                                 if (patch[r][c] >= max_num)
                                 {
                                     max_num = patch[r][c];
                                 }
 
-                            }
+                           }
 
                         }
 
@@ -107,18 +108,15 @@ Tensor maxpooling(Tensor op, int k = 3, int p = 1, int s = 2)
 
 Tensor elemwiseadd(Tensor op1, Tensor op2)
 {
-
-    // compare size
-    // op1
     const int op1_d4 = op1.size();
     const int op1_d3 = op1[0].size();
-    const int op1_w = op1[0][0].size();
-
-    // op2
-
+    const int op1_w = op1[0][0].size();  
+    
+    
     const int op2_d4 = op2.size();
     const int op2_d3 = op2[0].size();
     const int op2_w = op2[0][0].size();
+
 
     // set the size of the results
     const int d4 = max(op1_d4, op2_d4);
@@ -133,26 +131,30 @@ Tensor elemwiseadd(Tensor op1, Tensor op2)
     // element wise add
     #pragma omp parallel for
     for (int x = 0; x < res.size(); x++)
-    {
-        for (int y = 0; y < res[0].size(); y++)
-        {
-            for (int r = 0; r < res[0][0].size(); r++)
-            {
-                for (int c = 0; c < res[0][0][0].size(); c++)
-                {
+    {   
+        #pragma omp parallel
+        {   
+            int id = omp_get_thread_num();
+            int nthrds = omp_get_num_threads();
 
-                    res[x][y][r][c] = op1[x % op1_d4][y % op1_d3][r % op1_w][c % op1_w] +
-                        op2[x % op2_d4][y % op2_d3][r % op2_w][c % op2_w];
+            for (int y = id; y < res[0].size(); y += nthrds)
+            {
+                for (int r = 0; r < res[0][0].size(); r++)
+                {
+                    for (int c = 0; c < res[0][0][0].size(); c++)
+                    {
+
+                        res[x][y][r][c] = op1[x % op1_d4][y % op1_d3][r % op1_w][c % op1_w] +
+                            op2[x % op2_d4][y % op2_d3][r % op2_w][c % op2_w];
+                    }
+
+
                 }
 
-
             }
-
         }
 
     }
-
-
     return res;
 }
 
