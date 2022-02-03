@@ -1,7 +1,4 @@
-﻿// graph.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
-//
-
-#include <iostream>
+﻿#include <iostream>
 #include "omp.h"
 #include <iostream>
 #include <math.h>
@@ -24,18 +21,13 @@ Tensor maxpooling(Tensor op, int k = 3, int p = 1, int s = 2)
         s = stride, default 2
     */
 
-
-    // get the size of op
-    const int d4 = op.size();
-    const int d3 = op[0].size();
-    const int edge = op[0][0].size();
-
     //calculate the size of output
-    const int w = floor((edge - k + 2 * p) / s) + 1;
+    const int w = floor((op[0][0].size() - k + 2 * p) / s) + 1;
 
-    Tensor result(d4, vector<vector<vector<int>>>(d3, vector<vector<int>>(w, vector<int>(w, 0))));
+    Tensor result(op.size(), vector<vector<vector<int>>>(op[0].size(), vector<vector<int>>(w, vector<int>(w, 0))));
 
     omp_set_num_threads(NUM_THREADS);
+    
     // padding and maxpooling
     for (int x = 0; x < result.size(); x++)
     {
