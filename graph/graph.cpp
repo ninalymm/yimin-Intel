@@ -29,13 +29,13 @@ Tensor maxpooling(Tensor op, int k = 3, int p = 1, int s = 2)
     omp_set_num_threads(NUM_THREADS);
     
     // padding and maxpooling
-    for (int y = 0; y < result[0].size(); y++)
+    for (int x = 0; x < result.size(); x++)
     {
         #pragma omp parallel
         {
             int id = omp_get_thread_num();
             int nthrds = omp_get_num_threads();
-            for (int x = id; x < result.size(); x += nthrds)
+            for (int y = id; y < result[0].size(); y += nthrds)
             {
             
                 // padding 
@@ -139,17 +139,25 @@ Tensor elemwiseadd(Tensor op1, Tensor op2)
 
             for (int y = id; y < res[0].size(); y += nthrds)
             {
+
+                
                 for (int r = 0; r < res[0][0].size(); r++)
                 {
-                    for (int c = 0; c < res[0][0][0].size(); c++)
-                    {
 
-                        res[x][y][r][c] = op1[x % op1_d4][y % op1_d3][r % op1_w][c % op1_w] +
-                            op2[x % op2_d4][y % op2_d3][r % op2_w][c % op2_w];
-                    }
+                  
+                    __m128i op1_1, op1_2, op1_3, op1_4;
+                    __m128i op2_1, op2_2, op2_3, op2_4;
+
+                    _mm_storeu_ps(res[x][y][r], _mm_add_ps(a, b));
+                        
+                        
+                        //res[x][y][r][c] = op1[x % op1_d4][y % op1_d3][r % op1_w][c % op1_w] + 
+                        // op2[x % op2_d4][y % op2_d3][r % op2_w][c % op2_w];
+              
 
 
                 }
+               
 
             }
         }
