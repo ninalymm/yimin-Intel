@@ -7,8 +7,14 @@
 #include <ctime>
 #include "graph.h" 
 #include "omp.h"
+#include <emmintrin.h>
+#include <immintrin.h>
+#include <xmmintrin.h>
 
-typedef vector<vector<vector<vector<int>>>> Tensor;
+
+
+
+typedef vector<vector<vector<vector<float>>>> Tensor;
 using namespace std;
 
 // main test
@@ -16,8 +22,8 @@ int main()
 {
 
     //initialisation
-    Tensor s1(32, vector<vector<vector<int>>>(64, vector<vector<int>>(112, vector<int>(112, 0))));
-    Tensor s2(32, vector<vector<vector<int>>>(1, vector<vector<int>>(56, vector<int>(56, 2))));
+    Tensor s1(32, vector<vector<vector<float>>>(64, vector<vector<float>>(112, vector<float>(112, 0))));
+    Tensor s2(32, vector<vector<vector<float>>>(1, vector<vector<float>>(56, vector<float>(56, 2))));
 
 
     /*
@@ -51,7 +57,45 @@ int main()
     output = elemwiseadd(maxpooling(s1), s2);
 
     /*
+    vector<vector<float>> aa (16, vector<float>(16, 1));
+    vector<vector<float>> bb (16, vector<float>(16, 3));
+
+    vector<vector<float>> cc (16, vector<float>(16, 0));
+
+    for (int i = 0; i < 16; i++)
+    {
+        for (int j = 0; j < 16; j+=4)
+        {
+            __m128 op1_m = _mm_loadu_ps(&aa[i][j]);
+            __m128 op2_m = _mm_loadu_ps(&bb[i][j]);
+
+            __m128 vres = _mm_add_ps(op1_m, op2_m);
+
+
+            _mm_store_ss(&cc[i][j], vres);
+            cout << cc[i][j]<< cc[i][j] << cc[i][j] << cc[i][j] << endl;
+
+        }
+
+    }
+    */
+
+    /*
+    for (int i = 0; i < 16; i++)
+    {
+        for (int j = 0; j < 16; j++)
+        {
+            cout << cc[i][j] << endl;
+
+        }
+
+    }*/
+
+    
+
+
      // testoutput
+    /*
     for (int i = 0; i < output.size(); i++)
     {
         for (int j = 0; j < output[0].size(); j++)

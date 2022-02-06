@@ -4,7 +4,7 @@
 #include <vector>
 using namespace std;
 
-typedef vector<vector<vector<vector<int>>>> Tensor;
+typedef vector<vector<vector<vector<float>>>> Tensor;
 Tensor maxpooling(Tensor op, int k = 3, int p = 1, int s = 2);
 Tensor elemwiseadd(Tensor op1, Tensor op2);
 Tensor backward(Tensor output, Tensor input);
